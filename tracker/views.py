@@ -4,8 +4,8 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django.db.models.functions import TruncMonth
-from .models import Wydatek, Przychod, Cel
-from .forms import WydatekForm, PrzychodzForm, CelForm, WydatekFilter
+from .models import Wydatek, Przychod, Cel, Wplata
+from .forms import WydatekForm, PrzychodzForm, CelForm, WydatekFilter, WplataForm
 import json
 
 def rejestracja(request):
@@ -214,3 +214,40 @@ def usun_cel(request, pk):
         cel.delete()
         return redirect('dashboard')
     return render(request, 'tracker/usun.html', {'wydatek': cel})
+
+@login_required
+def szczegoly_celu(request, pk):
+    cel = get_object_or_404(Cel, pk=pk)
+    wplaty = cel.wplaty.all().order_by('-data')
+    suma = cel.suma_wplat()
+    pozostalo = cel.kwota_docelowa - suma
+    return render(request, 'tracker/cel_szczegoly.html', {
+        'cel': cel,
+        'wplaty': wplaty,
+        'suma': suma,
+        'pozostalo': pozostalo,
+    })
+
+@login_required
+def dodaj_wplate(request, pk):
+    cel = get_object_or_404(Cel, pk=pk)
+    if request.method == 'POST':
+        form = WplataForm(request.POST)
+        if form.is_valid():
+            wplata = form.save(commit=False)
+            wplata.cel = cel
+            wplata.user = request.user
+            wplata.save()
+            return redirect('szczegoly_celu', pk=pk)
+    else:
+        form = WplataForm()
+    return render(request, 'tracker/formularz.html', {'form': form, 'tytul': f'Dodaj wpłatę do: {cel.nazwa}'})
+
+@login_required
+def usun_wplate(request, pk):
+    wplata = get_object_or_404(Wplata, pk=pk)
+    cel_pk = wplata.cel.pk
+    if request.method == 'POST':
+        wplata.delete()
+        return redirect('szczegoly_celu', pk=cel_pk)
+    return render(request, 'tracker/usun.html', {'wydatek': wplata})

@@ -20,4 +20,7 @@ urlpatterns = [
     path('cele/dodaj/', views.dodaj_cel, name='dodaj_cel'),
     path('cele/edytuj/<int:pk>/', views.edytuj_cel, name='edytuj_cel'),
     path('cele/usun/<int:pk>/', views.usun_cel, name='usun_cel'),
+    path('cele/<int:pk>/', views.szczegoly_celu, name='szczegoly_celu'),
+    path('cele/<int:pk>/wplata/', views.dodaj_wplate, name='dodaj_wplate'),
+    path('wplaty/<int:pk>/usun/', views.usun_wplate, name='usun_wplate'),
 ]

@@ -1,0 +1,75 @@
+{% extends 'tracker/base.html' %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+    <h1>{{ cel.nazwa }}</h1>
+    <a href="{% url 'dodaj_wplate' cel.pk %}" class="btn btn-primary">+ Dodaj wpłatę</a>
+</div>
+
+<div class="grid-3">
+    <div class="stat-card">
+        <div class="stat-label">Cel</div>
+        <div class="stat-value blue">{{ cel.kwota_docelowa }} zł</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Uzbierano</div>
+        <div class="stat-value green">{{ suma }} zł</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Pozostało</div>
+        <div class="stat-value {% if pozostalo <= 0 %}green{% else %}red{% endif %}">
+            {{ pozostalo }} zł
+        </div>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom:20px;">
+    <h2>Postęp</h2>
+    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+        <span style="color:#94a3b8;">{{ cel.suma_wplat }} / {{ cel.kwota_docelowa }} zł</span>
+        <span style="color:#818cf8; font-weight:600;">{{ cel.procent }}%</span>
+    </div>
+    <div class="progress-bar">
+        <div class="progress-fill" style="width:{{ cel.procent }}%"></div>
+    </div>
+    {% if cel.termin %}
+    <div style="margin-top:8px; font-size:13px; color:#64748b;">Termin: {{ cel.termin }}</div>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2>Historia wpłat</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Kwota</th>
+                <th>Opis</th>
+                <th>Kto</th>
+                <th>Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for wplata in wplaty %}
+            <tr>
+                <td style="color:#64748b;">{{ wplata.data }}</td>
+                <td style="color:#4ade80; font-weight:600;">+{{ wplata.kwota }} zł</td>
+                <td>{{ wplata.opis|default:"-" }}</td>
+                <td style="color:#818cf8;">{{ wplata.user.username }}</td>
+                <td>
+                    <a href="{% url 'usun_wplate' wplata.pk %}" class="btn btn-danger" style="padding:6px 12px; font-size:12px;">Usuń</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align:center; color:#64748b; padding:40px;">Brak wpłat – dodaj pierwszą!</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div style="margin-top:16px;">
+    <a href="{% url 'dashboard' %}" class="btn btn-ghost">← Wróć do dashboardu</a>
+</div>
+{% endblock %}

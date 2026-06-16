@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models import Sum
 
 KATEGORIE = [
     ('jedzenie', 'Jedzenie'),
@@ -41,7 +42,21 @@ class Cel(models.Model):
     def __str__(self):
         return self.nazwa
 
+    def suma_wplat(self):
+        return self.wplaty.aggregate(Sum('kwota'))['kwota__sum'] or 0
+
     def procent(self):
+        suma = self.suma_wplat()
         if self.kwota_docelowa > 0:
-            return min(int((self.kwota_odlozona / self.kwota_docelowa) * 100), 100)
+            return min(int((suma / self.kwota_docelowa) * 100), 100)
         return 0
+
+class Wplata(models.Model):
+    cel = models.ForeignKey(Cel, on_delete=models.CASCADE, related_name='wplaty')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    kwota = models.DecimalField(max_digits=10, decimal_places=2)
+    data = models.DateField()
+    opis = models.CharField(max_length=200, blank=True)
+
+    def __str__(self):
+        return f"{self.kwota} zł - {self.data}"

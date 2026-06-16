@@ -1,6 +1,15 @@
 from django import forms
 from django_filters import FilterSet, ChoiceFilter
-from .models import Wydatek, Przychod, Cel, KATEGORIE
+from .models import Wydatek, Przychod, Cel, Wplata, KATEGORIE
+
+class WplataForm(forms.ModelForm):
+    class Meta:
+        model = Wplata
+        fields = ['kwota', 'data', 'opis']
+        widgets = {
+            'data': forms.DateInput(attrs={'type': 'date'}),
+        }
+
 
 class WydatekForm(forms.ModelForm):
     class Meta:
@@ -32,3 +41,11 @@ class WydatekFilter(FilterSet):
     class Meta:
         model = Wydatek
         fields = ['kategoria']
+
+class WplataForm(forms.ModelForm):
+    class Meta:
+        model = Wplata
+        fields = ['kwota', 'data', 'opis']
+        widgets = {
+            'data': forms.DateInput(attrs={'type': 'date'}),
+        }
