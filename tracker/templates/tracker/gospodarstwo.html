@@ -14,9 +14,12 @@
             <span style="font-size:12px; color:#94a3b8;">👤 Członek</span>
             {% endif %}
         </div>
-        {% if czlonek.rola == 'admin' %}
-        <a href="{% url 'zmien_nazwe_gospodarstwa' %}" class="btn btn-ghost" style="font-size:13px;">Zmień nazwę</a>
-        {% endif %}
+        <div style="display:flex; gap:8px;">
+            {% if czlonek.rola == 'admin' %}
+            <a href="{% url 'zmien_nazwe_gospodarstwa' %}" class="btn btn-ghost" style="font-size:13px;">Zmień nazwę</a>
+            {% endif %}
+            <a href="{% url 'dolacz_do_gospodarstwa' %}" class="btn btn-ghost" style="font-size:13px;">+ Dołącz do innego</a>
+        </div>
     </div>
 
     <div style="background:rgba(99,102,241,0.1); border:1px solid rgba(99,102,241,0.3); border-radius:10px; padding:16px; margin-bottom:20px;">
@@ -58,17 +61,7 @@
         </tbody>
     </table>
 </div>
-{% else %}
-<div class="card" style="text-align:center; padding:40px;">
-    <div style="font-size:48px; margin-bottom:16px;">🏠</div>
-    <p style="color:#64748b; margin-bottom:24px;">Nie należysz jeszcze do żadnego gospodarstwa.</p>
-    <div style="display:flex; gap:12px; justify-content:center;">
-        <a href="{% url 'stworz_gospodarstwo' %}" class="btn btn-primary">Stwórz gospodarstwo</a>
-        <a href="{% url 'dolacz_do_gospodarstwa' %}" class="btn btn-ghost">Dołącz do istniejącego</a>
-    </div>
-</div>
-{% endif %}
-{% if wszystkie_gospodarstwa.count > 1 %}
+
 <div class="card">
     <h2>Wszystkie twoje gospodarstwa</h2>
     <table>
@@ -99,6 +92,16 @@
             {% endfor %}
         </tbody>
     </table>
+</div>
+
+{% else %}
+<div class="card" style="text-align:center; padding:40px;">
+    <div style="font-size:48px; margin-bottom:16px;">🏠</div>
+    <p style="color:#64748b; margin-bottom:24px;">Nie należysz jeszcze do żadnego gospodarstwa.</p>
+    <div style="display:flex; gap:12px; justify-content:center;">
+        <a href="{% url 'stworz_gospodarstwo' %}" class="btn btn-primary">Stwórz gospodarstwo</a>
+        <a href="{% url 'dolacz_do_gospodarstwa' %}" class="btn btn-ghost">Dołącz do istniejącego</a>
+    </div>
 </div>
 {% endif %}
 {% endblock %}
