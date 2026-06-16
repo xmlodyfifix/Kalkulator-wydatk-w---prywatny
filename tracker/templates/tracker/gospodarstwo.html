@@ -5,21 +5,54 @@
 
 {% if gospodarstwo %}
 <div class="card">
-    <h2>{{ gospodarstwo.nazwa }}</h2>
-    <p style="color:#64748b; margin-bottom:16px;">Kod do dołączenia: <strong style="color:#818cf8; font-size:18px;">{{ gospodarstwo.id }}</strong></p>
-    <p style="color:#94a3b8; font-size:13px; margin-bottom:20px;">Podaj ten kod osobie którą chcesz zaprosić – wejdzie na stronę "Dołącz do gospodarstwa" i wpisze go.</p>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <div>
+            <h2>{{ gospodarstwo.nazwa }}</h2>
+            {% if czlonek.rola == 'admin' %}
+            <span style="font-size:12px; color:#4ade80;">👑 Administrator</span>
+            {% else %}
+            <span style="font-size:12px; color:#94a3b8;">👤 Członek</span>
+            {% endif %}
+        </div>
+        {% if czlonek.rola == 'admin' %}
+        <a href="{% url 'zmien_nazwe_gospodarstwa' %}" class="btn btn-ghost" style="font-size:13px;">Zmień nazwę</a>
+        {% endif %}
+    </div>
+
+    <div style="background:rgba(99,102,241,0.1); border:1px solid rgba(99,102,241,0.3); border-radius:10px; padding:16px; margin-bottom:20px;">
+        <p style="color:#94a3b8; font-size:13px; margin-bottom:4px;">Kod do dołączenia:</p>
+        <p style="color:#818cf8; font-size:24px; font-weight:700; letter-spacing:0.1em;">{{ gospodarstwo.kod }}</p>
+        <p style="color:#64748b; font-size:12px; margin-top:4px;">Podaj ten kod osobie którą chcesz zaprosić.</p>
+    </div>
 
     <h2>Członkowie</h2>
     <table>
         <thead>
             <tr>
                 <th>Użytkownik</th>
+                <th>Rola</th>
+                {% if czlonek.rola == 'admin' %}
+                <th>Akcje</th>{% endif %}
             </tr>
         </thead>
         <tbody>
-            {% for uzytkownik in gospodarstwo.uzytkownicy.all %}
+            {% for c in gospodarstwo.czlonekgospodarstwa_set.all %}
             <tr>
-                <td>👤 {{ uzytkownik.username }}</td>
+                <td>👤 {{ c.user.username }}</td>
+                <td>
+                    {% if c.rola == 'admin' %}
+                    <span style="color:#4ade80;">👑 Admin</span>
+                    {% else %}
+                    <span style="color:#94a3b8;">Członek</span>
+                    {% endif %}
+                </td>
+                {% if czlonek.rola == 'admin' %}
+                <td>
+                    {% if c.user != request.user %}
+                    <a href="{% url 'usun_czlonka' c.pk %}" class="btn btn-danger" style="padding:6px 12px; font-size:12px;">Usuń</a>
+                    {% endif %}
+                </td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>

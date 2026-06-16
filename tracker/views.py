@@ -4,7 +4,7 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django.db.models.functions import TruncMonth
-from .models import Wydatek, Przychod, Cel, Wplata, Gospodarstwo
+from .models import Wydatek, Przychod, Cel, Wplata, Gospodarstwo, CzlonekGospodarstwa
 from .forms import WydatekForm, PrzychodzForm, CelForm, WydatekFilter, WplataForm
 import json
 
@@ -273,14 +273,49 @@ def usun_wplate(request, pk):
 @login_required
 def gospodarstwo_view(request):
     gospodarstwo = Gospodarstwo.objects.filter(uzytkownicy=request.user).first()
-    return render(request, 'tracker/gospodarstwo.html', {'gospodarstwo': gospodarstwo})
+    czlonek = None
+    if gospodarstwo:
+        czlonek = CzlonekGospodarstwa.objects.filter(user=request.user, gospodarstwo=gospodarstwo).first()
+    return render(request, 'tracker/gospodarstwo.html', {
+        'gospodarstwo': gospodarstwo,
+        'czlonek': czlonek,
+    })
+
+@login_required
+def usun_czlonka(request, pk):
+    czlonek = get_object_or_404(CzlonekGospodarstwa, pk=pk)
+    gospodarstwo = czlonek.gospodarstwo
+    admin = CzlonekGospodarstwa.objects.filter(user=request.user, gospodarstwo=gospodarstwo, rola='admin').first()
+    if admin and czlonek.user != request.user:
+        czlonek.delete()
+    return redirect('gospodarstwo')
+
+@login_required
+def zmien_nazwe_gospodarstwa(request):
+    gospodarstwo = Gospodarstwo.objects.filter(uzytkownicy=request.user).first()
+    czlonek = CzlonekGospodarstwa.objects.filter(user=request.user, gospodarstwo=gospodarstwo, rola='admin').first()
+    if not czlonek:
+        return redirect('gospodarstwo')
+    if request.method == 'POST':
+        nazwa = request.POST.get('nazwa')
+        gospodarstwo.nazwa = nazwa
+        gospodarstwo.save()
+        return redirect('gospodarstwo')
+    return render(request, 'tracker/formularz_gospodarstwo.html', {
+        'tytul': 'Zmień nazwę gospodarstwa',
+        'nazwa': gospodarstwo.nazwa,
+    })
 
 @login_required
 def stworz_gospodarstwo(request):
     if request.method == 'POST':
         nazwa = request.POST.get('nazwa')
         gospodarstwo = Gospodarstwo.objects.create(nazwa=nazwa)
-        gospodarstwo.uzytkownicy.add(request.user)
+        CzlonekGospodarstwa.objects.create(
+            user=request.user,
+            gospodarstwo=gospodarstwo,
+            rola='admin'
+        )
         return redirect('gospodarstwo')
     return render(request, 'tracker/formularz_gospodarstwo.html', {'tytul': 'Stwórz gospodarstwo'})
 
@@ -289,8 +324,12 @@ def dolacz_do_gospodarstwa(request):
     if request.method == 'POST':
         kod = request.POST.get('kod')
         try:
-            gospodarstwo = Gospodarstwo.objects.get(id=kod)
-            gospodarstwo.uzytkownicy.add(request.user)
+            gospodarstwo = Gospodarstwo.objects.get(kod=kod)
+            CzlonekGospodarstwa.objects.get_or_create(
+                user=request.user,
+                gospodarstwo=gospodarstwo,
+                defaults={'rola': 'member'}
+            )
             return redirect('gospodarstwo')
         except Gospodarstwo.DoesNotExist:
             return render(request, 'tracker/formularz_gospodarstwo.html', {

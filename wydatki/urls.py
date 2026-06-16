@@ -26,4 +26,6 @@ urlpatterns = [
     path('gospodarstwo/', views.gospodarstwo_view, name='gospodarstwo'),
     path('gospodarstwo/stworz/', views.stworz_gospodarstwo, name='stworz_gospodarstwo'),
     path('gospodarstwo/dolacz/', views.dolacz_do_gospodarstwa, name='dolacz_do_gospodarstwa'),
+    path('gospodarstwo/usun-czlonka/<int:pk>/', views.usun_czlonka, name='usun_czlonka'),
+    path('gospodarstwo/zmien-nazwe/', views.zmien_nazwe_gospodarstwa, name='zmien_nazwe_gospodarstwa'),
 ]

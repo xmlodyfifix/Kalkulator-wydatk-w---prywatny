@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Sum
+import random
+import string
 
 KATEGORIE = [
     ('jedzenie', 'Jedzenie'),
@@ -10,12 +12,31 @@ KATEGORIE = [
     ('inne', 'Inne'),
 ]
 
+def generuj_kod():
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+
 class Gospodarstwo(models.Model):
     nazwa = models.CharField(max_length=200)
-    uzytkownicy = models.ManyToManyField(User, related_name='gospodarstwa')
+    kod = models.CharField(max_length=10, unique=True, default=generuj_kod)
+    uzytkownicy = models.ManyToManyField(User, through='CzlonekGospodarstwa', related_name='gospodarstwa')
 
     def __str__(self):
         return self.nazwa
+
+class CzlonekGospodarstwa(models.Model):
+    ROLE = [
+        ('admin', 'Administrator'),
+        ('member', 'Członek'),
+    ]
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    gospodarstwo = models.ForeignKey(Gospodarstwo, on_delete=models.CASCADE)
+    rola = models.CharField(max_length=10, choices=ROLE, default='member')
+
+    class Meta:
+        unique_together = ('user', 'gospodarstwo')
+
+    def __str__(self):
+        return f"{self.user.username} - {self.gospodarstwo.nazwa} ({self.rola})"
 
 class Wydatek(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
