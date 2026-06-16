@@ -293,13 +293,16 @@ def usun_czlonka(request, pk):
 @login_required
 def zmien_nazwe_gospodarstwa(request):
     gospodarstwo = Gospodarstwo.objects.filter(uzytkownicy=request.user).first()
+    if not gospodarstwo:
+        return redirect('gospodarstwo')
     czlonek = CzlonekGospodarstwa.objects.filter(user=request.user, gospodarstwo=gospodarstwo, rola='admin').first()
     if not czlonek:
         return redirect('gospodarstwo')
     if request.method == 'POST':
         nazwa = request.POST.get('nazwa')
-        gospodarstwo.nazwa = nazwa
-        gospodarstwo.save()
+        if nazwa:
+            gospodarstwo.nazwa = nazwa
+            gospodarstwo.save()
         return redirect('gospodarstwo')
     return render(request, 'tracker/formularz_gospodarstwo.html', {
         'tytul': 'Zmień nazwę gospodarstwa',

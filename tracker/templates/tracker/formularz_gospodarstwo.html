@@ -17,6 +17,9 @@
                 {% if 'Stwórz' in tytul %}
                 <label>Nazwa gospodarstwa</label>
                 <input type="text" name="nazwa" placeholder="np. Filip i Kinga" required>
+                {% elif 'Zmień' in tytul %}
+                <label>Nowa nazwa gospodarstwa</label>
+                <input type="text" name="nazwa" value="{{ nazwa }}" required>
                 {% else %}
                 <label>Kod gospodarstwa</label>
                 <input type="text" name="kod" placeholder="Wpisz kod od partnera" required>
