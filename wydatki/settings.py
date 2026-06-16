@@ -124,6 +124,6 @@ LOGIN_URL = '/logowanie/'
 LOGIN_REDIRECT_URL = '/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 CSRF_TRUSTED_ORIGINS = ['https://web-production-8000d.up.railway.app']
