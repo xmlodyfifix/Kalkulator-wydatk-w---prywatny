@@ -68,4 +68,37 @@
     </div>
 </div>
 {% endif %}
+{% if wszystkie_gospodarstwa.count > 1 %}
+<div class="card">
+    <h2>Wszystkie twoje gospodarstwa</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Nazwa</th>
+                <th>Kod</th>
+                <th>Twoja rola</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for g in wszystkie_gospodarstwa %}
+            <tr>
+                <td>{{ g.nazwa }}</td>
+                <td style="color:#818cf8; font-weight:600; letter-spacing:0.1em;">{{ g.kod }}</td>
+                <td>
+                    {% for c in g.czlonekgospodarstwa_set.all %}
+                    {% if c.user == request.user %}
+                    {% if c.rola == 'admin' %}
+                    <span style="color:#4ade80;">👑 Admin</span>
+                    {% else %}
+                    <span style="color:#94a3b8;">Członek</span>
+                    {% endif %}
+                    {% endif %}
+                    {% endfor %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
 {% endblock %}

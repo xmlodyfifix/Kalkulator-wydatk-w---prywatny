@@ -272,13 +272,15 @@ def usun_wplate(request, pk):
 
 @login_required
 def gospodarstwo_view(request):
-    gospodarstwo = Gospodarstwo.objects.filter(uzytkownicy=request.user).first()
+    gospodarstwa = Gospodarstwo.objects.filter(uzytkownicy=request.user)
+    aktywne = gospodarstwa.first()
     czlonek = None
-    if gospodarstwo:
-        czlonek = CzlonekGospodarstwa.objects.filter(user=request.user, gospodarstwo=gospodarstwo).first()
+    if aktywne:
+        czlonek = CzlonekGospodarstwa.objects.filter(user=request.user, gospodarstwo=aktywne).first()
     return render(request, 'tracker/gospodarstwo.html', {
-        'gospodarstwo': gospodarstwo,
+        'gospodarstwo': aktywne,
         'czlonek': czlonek,
+        'wszystkie_gospodarstwa': gospodarstwa,
     })
 
 @login_required
