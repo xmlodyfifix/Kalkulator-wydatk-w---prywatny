@@ -10,8 +10,16 @@ KATEGORIE = [
     ('inne', 'Inne'),
 ]
 
+class Gospodarstwo(models.Model):
+    nazwa = models.CharField(max_length=200)
+    uzytkownicy = models.ManyToManyField(User, related_name='gospodarstwa')
+
+    def __str__(self):
+        return self.nazwa
+
 class Wydatek(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    gospodarstwo = models.ForeignKey(Gospodarstwo, on_delete=models.SET_NULL, null=True, blank=True)
     nazwa = models.CharField(max_length=200)
     kwota = models.DecimalField(max_digits=10, decimal_places=2)
     kategoria = models.CharField(max_length=50, choices=KATEGORIE)
@@ -23,6 +31,7 @@ class Wydatek(models.Model):
 
 class Przychod(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    gospodarstwo = models.ForeignKey(Gospodarstwo, on_delete=models.SET_NULL, null=True, blank=True)
     opis = models.CharField(max_length=200)
     kwota = models.DecimalField(max_digits=10, decimal_places=2)
     data = models.DateField()
@@ -33,6 +42,7 @@ class Przychod(models.Model):
 
 class Cel(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    gospodarstwo = models.ForeignKey(Gospodarstwo, on_delete=models.SET_NULL, null=True, blank=True)
     nazwa = models.CharField(max_length=200)
     kwota_docelowa = models.DecimalField(max_digits=10, decimal_places=2)
     kwota_odlozona = models.DecimalField(max_digits=10, decimal_places=2, default=0)

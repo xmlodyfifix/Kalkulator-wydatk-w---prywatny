@@ -23,4 +23,7 @@ urlpatterns = [
     path('cele/<int:pk>/', views.szczegoly_celu, name='szczegoly_celu'),
     path('cele/<int:pk>/wplata/', views.dodaj_wplate, name='dodaj_wplate'),
     path('wplaty/<int:pk>/usun/', views.usun_wplate, name='usun_wplate'),
+    path('gospodarstwo/', views.gospodarstwo_view, name='gospodarstwo'),
+    path('gospodarstwo/stworz/', views.stworz_gospodarstwo, name='stworz_gospodarstwo'),
+    path('gospodarstwo/dolacz/', views.dolacz_do_gospodarstwa, name='dolacz_do_gospodarstwa'),
 ]

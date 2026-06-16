@@ -4,7 +4,7 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django.db.models.functions import TruncMonth
-from .models import Wydatek, Przychod, Cel, Wplata
+from .models import Wydatek, Przychod, Cel, Wplata, Gospodarstwo
 from .forms import WydatekForm, PrzychodzForm, CelForm, WydatekFilter, WplataForm
 import json
 
@@ -38,10 +38,12 @@ def wylogowanie(request):
 def dashboard(request):
     pokaz = request.GET.get('pokaz', 'moje')
 
-    if pokaz == 'wspolne':
-        wydatki_qs = Wydatek.objects.filter(wspolne=True)
-        przychody_qs = Przychod.objects.filter(wspolne=True)
-        cele = Cel.objects.filter(wspolne=True)
+    gospodarstwo = Gospodarstwo.objects.filter(uzytkownicy=request.user).first()
+
+    if pokaz == 'wspolne' and gospodarstwo:
+        wydatki_qs = Wydatek.objects.filter(gospodarstwo=gospodarstwo)
+        przychody_qs = Przychod.objects.filter(gospodarstwo=gospodarstwo)
+        cele = Cel.objects.filter(gospodarstwo=gospodarstwo)
     else:
         wydatki_qs = Wydatek.objects.filter(user=request.user)
         przychody_qs = Przychod.objects.filter(user=request.user)
@@ -66,18 +68,22 @@ def dashboard(request):
         'ostatnie_wydatki': ostatnie_wydatki,
         'cele': cele,
         'pokaz': pokaz,
+        'gospodarstwo': gospodarstwo,
     })
 
 @login_required
 def lista_wydatkow(request):
     pokaz = request.GET.get('pokaz', 'moje')
-    if pokaz == 'wspolne':
-        wydatki = Wydatek.objects.filter(wspolne=True).order_by('-data')
+    gospodarstwo = Gospodarstwo.objects.filter(uzytkownicy=request.user).first()
+
+    if pokaz == 'wspolne' and gospodarstwo:
+        wydatki = Wydatek.objects.filter(gospodarstwo=gospodarstwo).order_by('-data')
     else:
         wydatki = Wydatek.objects.filter(user=request.user).order_by('-data')
+
     f = WydatekFilter(request.GET, queryset=wydatki)
     sumy = f.qs.values('kategoria').annotate(suma=Sum('kwota')).order_by('kategoria')
-    return render(request, 'tracker/lista.html', {'filter': f, 'sumy': sumy, 'pokaz': pokaz})
+    return render(request, 'tracker/lista.html', {'filter': f, 'sumy': sumy, 'pokaz': pokaz, 'gospodarstwo': gospodarstwo})
 
 @login_required
 def dodaj_wydatek(request):
@@ -86,6 +92,9 @@ def dodaj_wydatek(request):
         if form.is_valid():
             wydatek = form.save(commit=False)
             wydatek.user = request.user
+            if wydatek.wspolne:
+                gospodarstwo = Gospodarstwo.objects.filter(uzytkownicy=request.user).first()
+                wydatek.gospodarstwo = gospodarstwo
             wydatek.save()
             return redirect('lista')
     else:
@@ -115,11 +124,14 @@ def usun_wydatek(request, pk):
 @login_required
 def lista_przychodow(request):
     pokaz = request.GET.get('pokaz', 'moje')
-    if pokaz == 'wspolne':
-        przychody = Przychod.objects.filter(wspolne=True).order_by('-data')
+    gospodarstwo = Gospodarstwo.objects.filter(uzytkownicy=request.user).first()
+
+    if pokaz == 'wspolne' and gospodarstwo:
+        przychody = Przychod.objects.filter(gospodarstwo=gospodarstwo).order_by('-data')
     else:
         przychody = Przychod.objects.filter(user=request.user).order_by('-data')
-    return render(request, 'tracker/przychody.html', {'przychody': przychody, 'pokaz': pokaz})
+
+    return render(request, 'tracker/przychody.html', {'przychody': przychody, 'pokaz': pokaz, 'gospodarstwo': gospodarstwo})
 
 @login_required
 def dodaj_przychod(request):
@@ -128,6 +140,9 @@ def dodaj_przychod(request):
         if form.is_valid():
             przychod = form.save(commit=False)
             przychod.user = request.user
+            if przychod.wspolne:
+                gospodarstwo = Gospodarstwo.objects.filter(uzytkownicy=request.user).first()
+                przychod.gospodarstwo = gospodarstwo
             przychod.save()
             return redirect('przychody')
     else:
@@ -189,6 +204,9 @@ def dodaj_cel(request):
         if form.is_valid():
             cel = form.save(commit=False)
             cel.user = request.user
+            if cel.wspolne:
+                gospodarstwo = Gospodarstwo.objects.filter(uzytkownicy=request.user).first()
+                cel.gospodarstwo = gospodarstwo
             cel.save()
             return redirect('dashboard')
     else:
@@ -251,3 +269,32 @@ def usun_wplate(request, pk):
         wplata.delete()
         return redirect('szczegoly_celu', pk=cel_pk)
     return render(request, 'tracker/usun.html', {'wydatek': wplata})
+
+@login_required
+def gospodarstwo_view(request):
+    gospodarstwo = Gospodarstwo.objects.filter(uzytkownicy=request.user).first()
+    return render(request, 'tracker/gospodarstwo.html', {'gospodarstwo': gospodarstwo})
+
+@login_required
+def stworz_gospodarstwo(request):
+    if request.method == 'POST':
+        nazwa = request.POST.get('nazwa')
+        gospodarstwo = Gospodarstwo.objects.create(nazwa=nazwa)
+        gospodarstwo.uzytkownicy.add(request.user)
+        return redirect('gospodarstwo')
+    return render(request, 'tracker/formularz_gospodarstwo.html', {'tytul': 'Stwórz gospodarstwo'})
+
+@login_required
+def dolacz_do_gospodarstwa(request):
+    if request.method == 'POST':
+        kod = request.POST.get('kod')
+        try:
+            gospodarstwo = Gospodarstwo.objects.get(id=kod)
+            gospodarstwo.uzytkownicy.add(request.user)
+            return redirect('gospodarstwo')
+        except Gospodarstwo.DoesNotExist:
+            return render(request, 'tracker/formularz_gospodarstwo.html', {
+                'tytul': 'Dołącz do gospodarstwa',
+                'blad': 'Nie znaleziono gospodarstwa o podanym kodzie.'
+            })
+    return render(request, 'tracker/formularz_gospodarstwo.html', {'tytul': 'Dołącz do gospodarstwa'})
