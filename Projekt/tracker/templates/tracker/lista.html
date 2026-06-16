@@ -1,0 +1,64 @@
+{% extends 'tracker/base.html' %}
+
+{% block content %}
+<h1>Wydatki</h1>
+
+<form method="get">
+    {{ filter.form.kategoria.label_tag }}
+    {{ filter.form.kategoria }}
+    <button type="submit" class="btn">Filtruj</button>
+</form>
+
+<br>
+
+<table>
+    <thead>
+        <tr>
+            <th>Nazwa</th>
+            <th>Kwota</th>
+            <th>Kategoria</th>
+            <th>Data</th>
+            <th>Akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for wydatek in filter.qs %}
+        <tr class="row-{{ wydatek.kategoria }}">
+            <td>{{ wydatek.nazwa }}</td>
+            <td>{{ wydatek.kwota }} zł</td>
+            <td>{{ wydatek.get_kategoria_display }}</td>
+            <td>{{ wydatek.data }}</td>
+            <td>
+                <a href="{% url 'edytuj' wydatek.pk %}">Edytuj</a> |
+                <a href="{% url 'usun' wydatek.pk %}">Usuń</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">Brak wydatków.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if sumy %}
+<h2>Podsumowanie</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Kategoria</th>
+            <th>Suma</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for s in sumy %}
+        <tr>
+            <td>{{ s.kategoria|capfirst }}</td>
+            <td>{{ s.suma }} zł</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+{% endblock %}
