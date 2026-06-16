@@ -1,0 +1,42 @@
+{% extends 'tracker/base.html' %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+    <h1>Przychody</h1>
+    <div style="display:flex; gap:8px;">
+        <a href="?pokaz=moje" class="btn {% if pokaz == 'moje' %}btn-primary{% else %}btn-ghost{% endif %}">👤 Moje</a>
+        <a href="?pokaz=wspolne" class="btn {% if pokaz == 'wspolne' %}btn-primary{% else %}btn-ghost{% endif %}">👫 Wspólne</a>
+        <a href="{% url 'dodaj_przychod' %}" class="btn btn-green">+ Dodaj przychód</a>
+    </div>
+</div>
+
+<div class="card">
+    <table>
+        <thead>
+            <tr>
+                <th>Opis</th>
+                <th>Kwota</th>
+                <th>Data</th>
+                <th>Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for przychod in przychody %}
+            <tr>
+                <td>{{ przychod.opis }}</td>
+                <td style="color:#4ade80; font-weight:600;">+{{ przychod.kwota }} zł</td>
+                <td style="color:#64748b;">{{ przychod.data }}</td>
+                <td>
+                    <a href="{% url 'edytuj_przychod' przychod.pk %}" class="btn btn-ghost" style="padding:6px 12px; font-size:12px;">Edytuj</a>
+                    <a href="{% url 'usun_przychod' przychod.pk %}" class="btn btn-danger" style="padding:6px 12px; font-size:12px;">Usuń</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" style="text-align:center; color:#64748b; padding:40px;">Brak przychodów</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

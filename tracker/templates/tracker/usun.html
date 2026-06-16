@@ -1,0 +1,18 @@
+{% extends 'tracker/base.html' %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 0 auto;">
+    <h1>Potwierdź usunięcie</h1>
+
+    <div class="card" style="text-align:center; padding:40px;">
+        <div style="font-size:48px; margin-bottom:16px;">🗑️</div>
+        <p style="color:#94a3b8; margin-bottom:8px;">Czy na pewno chcesz usunąć:</p>
+        <p style="font-size:18px; font-weight:600; color:#e2e8f0; margin-bottom:32px;">{{ wydatek }}</p>
+        <form method="post" style="display:flex; gap:12px; justify-content:center;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Usuń</button>
+            <a href="javascript:history.back()" class="btn btn-ghost">Anuluj</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

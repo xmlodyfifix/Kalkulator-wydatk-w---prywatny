@@ -1,0 +1,74 @@
+{% extends 'tracker/base.html' %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+    <h1>Wydatki</h1>
+    <div style="display:flex; gap:8px;">
+        <a href="?pokaz=moje" class="btn {% if pokaz == 'moje' %}btn-primary{% else %}btn-ghost{% endif %}">👤 Moje</a>
+        <a href="?pokaz=wspolne" class="btn {% if pokaz == 'wspolne' %}btn-primary{% else %}btn-ghost{% endif %}">👫 Wspólne</a>
+        <a href="{% url 'dodaj' %}" class="btn btn-primary">+ Dodaj wydatek</a>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom:20px;">
+    <form method="get" style="display:flex; align-items:center; gap:12px;">
+        <label style="margin:0; white-space:nowrap;">Filtruj po kategorii:</label>
+        {{ filter.form.kategoria }}
+        <button type="submit" class="btn btn-ghost">Filtruj</button>
+    </form>
+</div>
+
+<div class="card">
+    <table>
+        <thead>
+            <tr>
+                <th>Nazwa</th>
+                <th>Kwota</th>
+                <th>Kategoria</th>
+                <th>Data</th>
+                <th>Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for wydatek in filter.qs %}
+            <tr>
+                <td>{{ wydatek.nazwa }}</td>
+                <td style="color:#f87171; font-weight:600;">-{{ wydatek.kwota }} zł</td>
+                <td><span class="badge badge-{{ wydatek.kategoria }}">{{ wydatek.get_kategoria_display }}</span></td>
+                <td style="color:#64748b;">{{ wydatek.data }}</td>
+                <td>
+                    <a href="{% url 'edytuj' wydatek.pk %}" class="btn btn-ghost" style="padding:6px 12px; font-size:12px;">Edytuj</a>
+                    <a href="{% url 'usun' wydatek.pk %}" class="btn btn-danger" style="padding:6px 12px; font-size:12px;">Usuń</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align:center; color:#64748b; padding:40px;">Brak wydatków</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if sumy %}
+<div class="card">
+    <h2>Podsumowanie per kategoria</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Kategoria</th>
+                <th>Suma</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in sumy %}
+            <tr>
+                <td><span class="badge badge-{{ s.kategoria }}">{{ s.kategoria|capfirst }}</span></td>
+                <td style="color:#f87171; font-weight:600;">{{ s.suma }} zł</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endblock %}

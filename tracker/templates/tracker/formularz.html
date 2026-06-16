@@ -1,0 +1,40 @@
+{% extends 'tracker/base.html' %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 0 auto;">
+    <h1>{{ tytul }}</h1>
+
+    <div class="card">
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                <label>{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <div style="color:#f87171; font-size:12px; margin-top:4px;">{{ field.errors }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <div style="display:flex; gap:12px; margin-top:24px;">
+                <button type="submit" class="btn btn-primary">{{ tytul }}</button>
+                <a href="javascript:history.back()" class="btn btn-ghost">Anuluj</a>
+            </div>
+        </form>
+
+        {% if tytul == 'Logowanie' %}
+        <div style="margin-top:20px; padding-top:20px; border-top:1px solid rgba(99,102,241,0.2); text-align:center;">
+            <span style="color:#64748b; font-size:14px;">Nie masz konta? </span>
+            <a href="{% url 'rejestracja' %}" style="font-size:14px;">Zarejestruj się</a>
+        </div>
+        {% endif %}
+
+        {% if tytul == 'Rejestracja' %}
+        <div style="margin-top:20px; padding-top:20px; border-top:1px solid rgba(99,102,241,0.2); text-align:center;">
+            <span style="color:#64748b; font-size:14px;">Masz już konto? </span>
+            <a href="{% url 'logowanie' %}" style="font-size:14px;">Zaloguj się</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
